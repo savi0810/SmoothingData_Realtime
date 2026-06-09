@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AuthSefviceApi/AuthSefviceApi.csproj" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

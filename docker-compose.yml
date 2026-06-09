@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  auth-api:
+    build:
+      context: ./AuthSefviceApi
+      dockerfile: AuthSefviceApi/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5212:5212"
+    environment:
+      ASPNETCORE_URLS: http://+:5212
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=authdb;Username=postgres;Password=${POSTGRES_PASSWORD:-1234}
+      Cors__AllowedOrigins__0: ${FRONTEND_URL:-http://localhost:3000}
+      Jwt__Key: ${JWT_KEY:-SuperSecretKey_ChangeMe_MinLength32Chars!!}
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  data-api:
+    build:
+      context: ./SmoothingDataApi
+      dockerfile: SmoothingDataApi/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5186:5186"
+    environment:
+      ASPNETCORE_URLS: http://+:5186
+      Cors__AllowedOrigins__0: ${FRONTEND_URL:-http://localhost:3000}
+    networks:
+      - backend
+
+  frontend:
+    build:
+      context: ./SmoothingFrontend
+      dockerfile: Dockerfile
+      args:
+        VITE_HUB_URL: ${VITE_HUB_URL:-http://localhost:5186/hubs/prices}
+        VITE_AUTH_URL: ${VITE_AUTH_URL:-http://localhost:5212}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-api
+      - data-api
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:

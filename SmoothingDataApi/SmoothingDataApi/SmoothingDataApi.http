@@ -1,0 +1,6 @@
+@SmoothingDataApi_HostAddress = http://localhost:5186
+
+GET {{SmoothingDataApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

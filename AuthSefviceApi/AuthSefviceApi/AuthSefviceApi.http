@@ -1,0 +1,6 @@
+@AuthSefviceApi_HostAddress = http://localhost:5212
+
+GET {{AuthSefviceApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
